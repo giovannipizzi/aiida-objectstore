@@ -1153,6 +1153,9 @@ def test_get_objects_stream_closes(temp_container, generate_random_data):
        when it goes out of scope - so I add also the test that, inside the loop, at most one more file is open.
        The final check seems to always pass even if I forget to do close some file.
     """
+    import gc
+    gc.collect()
+
     data = generate_random_data()
     # Store
     obj_md5s = _add_objects_loose_loop(temp_container, data)
@@ -1277,6 +1280,13 @@ def test_get_objects_meta_doesnt_open(
     temp_container, generate_random_data
 ):  # pylint: disable=invalid-name
     """Test that get_objects_meta does not open any file."""
+    # TEMPORARY FIX: As described in issue aiida-team/aiida-core/issues/6739
+    # the container does not properly close its connection so we have to
+    # enforce the garbage collector to delete unerferenced resources. This
+    # should be fixed with PR #179
+    import gc
+    gc.collect()
+
     data = generate_random_data()
     # Store
     obj_md5s = _add_objects_loose_loop(temp_container, data)

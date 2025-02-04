@@ -87,6 +87,9 @@ def temp_dir():
     :return: The path to the directory
     :rtype: str
     """
+    import gc
+    gc.collect()
+
     try:
         dirpath = tempfile.mkdtemp()
         yield Path(dirpath)
