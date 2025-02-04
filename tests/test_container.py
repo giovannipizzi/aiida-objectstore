@@ -1154,6 +1154,7 @@ def test_get_objects_stream_closes(temp_container, generate_random_data):
        The final check seems to always pass even if I forget to do close some file.
     """
     import gc
+
     gc.collect()
 
     data = generate_random_data()
@@ -1285,6 +1286,7 @@ def test_get_objects_meta_doesnt_open(
     # enforce the garbage collector to delete unerferenced resources. This
     # should be fixed with PR #179
     import gc
+
     gc.collect()
 
     data = generate_random_data()

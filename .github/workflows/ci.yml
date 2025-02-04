@@ -50,7 +50,7 @@ jobs:
         # NOTE: We're asserting that the lockfile is up to date
         run: uv sync --locked --extra dev --extra progressbar --extra optionaltests --extra examples
         shell: bash
-      - name: Install disk-objectstore 
+      - name: Install disk-objectstore
         # I'm using pip install -e to make sure that the coverage properly traces the runs
         # also of the concurrent tests (maybe we can achieve this differently)
         run: uv pip install -e .[dev,progressbar,optionaltests,examples]

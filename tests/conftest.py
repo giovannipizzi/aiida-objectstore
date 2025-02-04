@@ -88,6 +88,7 @@ def temp_dir():
     :rtype: str
     """
     import gc
+
     gc.collect()
 
     try:
