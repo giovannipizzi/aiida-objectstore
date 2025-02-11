@@ -1282,6 +1282,8 @@ def test_deletion_closes_file_descriptors(temp_dir):
     before_init_open_files = len(current_process.open_files())
     temp_container = Container(temp_dir)
     temp_container.init_container()
+    import time
+    time.sleep(5)
 
     # Checks if initalisation actually opens files
     assert before_init_open_files < len(
