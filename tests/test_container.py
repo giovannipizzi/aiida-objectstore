@@ -1275,6 +1275,26 @@ def test_get_objects_stream_closes(temp_container, generate_random_data):
     assert len(current_process.open_files()) == start_open_files
 
 
+def test_deletion_closes_file_descriptors(temp_dir):
+    """Test if deletion of container closes correctly open file descriptors."""
+
+    current_process = psutil.Process()
+    before_init_open_files = len(current_process.open_files())
+    temp_container = Container(temp_dir)
+    temp_container.init_container()
+
+    # Checks if initalisation actually opens files
+    assert before_init_open_files < len(
+        current_process.open_files()
+    ), "No files have been opened during initalisation"
+
+    # Checks if deleting the container will close the files
+    del temp_container
+    after_del_open_files = len(current_process.open_files())
+
+    assert before_init_open_files == after_del_open_files
+
+
 def test_get_objects_meta_doesnt_open(
     temp_container, generate_random_data
 ):  # pylint: disable=invalid-name
