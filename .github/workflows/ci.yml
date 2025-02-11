@@ -46,6 +46,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[progressbar,optionaltests]
           pip install -r requirements.lock
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Test with pytest
         # No need to run the benchmarks, they will run in a different workflow
         # Also, run in very verbose mode so if there is an error we get a complete diff
