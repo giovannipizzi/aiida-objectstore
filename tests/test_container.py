@@ -1146,7 +1146,7 @@ def test_sizes(
         assert size_info["total_size_loose"] == 0
 
 
-def test_get_objects_stream_closes(temp_container, generate_random_data):
+def test_get_objects_stream_closes(temp_dir, generate_random_data):
     """Test that get_objects_stream_and_meta closes intermediate streams.
 
     I also check that at most one additional file is open at any given time.
@@ -1155,6 +1155,13 @@ def test_get_objects_stream_closes(temp_container, generate_random_data):
        when it goes out of scope - so I add also the test that, inside the loop, at most one more file is open.
        The final check seems to always pass even if I forget to do close some file.
     """
+    current_process = psutil.Process()
+    # We note the number of open of files, since Windows by default has some files open independent of the container
+    begin_test_open_files = len(current_process.open_files())
+
+    temp_container = Container(temp_dir)
+    temp_container.init_container()
+
     data = generate_random_data()
     # Store
     obj_md5s = _add_objects_loose_loop(temp_container, data)
@@ -1165,7 +1172,6 @@ def test_get_objects_stream_closes(temp_container, generate_random_data):
     # The following checks are still meaningful, I check that if I do it again I don't open more files.
     temp_container.get_objects_content(obj_md5s.keys())
 
-    current_process = psutil.Process()
     start_open_files = len(current_process.open_files())
 
     with temp_container.get_objects_stream_and_meta(
@@ -1273,6 +1279,37 @@ def test_get_objects_stream_closes(temp_container, generate_random_data):
             stream.read()
     # Check that at the end nothing is left open
     assert len(current_process.open_files()) == start_open_files
+
+    # Check if it goes back to 0
+    temp_container.close()
+    assert len(current_process.open_files()) == begin_test_open_files
+
+
+def test_deletion_closes_file_descriptors(temp_dir, generate_random_data):
+    """Test if deletion of container closes correctly open file descriptors."""
+
+    current_process = psutil.Process()
+    # We note the number of open of files, since Windows by default has some files open independent of the container
+    begin_test_open_files = len(current_process.open_files())
+
+    # Open files
+    temp_container = Container(temp_dir)
+    temp_container.init_container(clear=True)
+    # For Linux to open files it is required to reading from container, on macOS
+    # the initialization of container is enough
+    data = generate_random_data()
+    obj_md5s = _add_objects_loose_loop(temp_container, data)
+    _ = temp_container.get_objects_content(obj_md5s.keys())
+
+    # Checks if initalisation actually opens files
+    assert 0 < len(
+        current_process.open_files()
+    ), "No files have been opened during initalisation"
+
+    # Checks if deleting the container will close the files
+    del temp_container
+
+    assert begin_test_open_files == len(current_process.open_files())
 
 
 def test_get_objects_meta_doesnt_open(
