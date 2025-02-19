@@ -38,6 +38,7 @@ Source = 'https://github.com/aiidateam/disk-objectstore'
 
 [project.optional-dependencies]
 dev = [
+    'psutil',
     'coverage',
     'pre-commit',
     'pytest',
@@ -139,3 +140,6 @@ commands = pytest {posargs}
 description = Run CLI
 commands = dostore {posargs}
 """
+
+[tool.uv]
+required-version = ">=0.5.21"
